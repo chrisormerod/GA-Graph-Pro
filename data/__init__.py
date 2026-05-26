@@ -4,6 +4,8 @@ from .download_raw import (check_raw_data,
 from .parse_raw import (check_parsed_data,)
 from .get_data import (get_target_data, get_descriptions)
 
+check_raw_data()
+
 def check_status():
     check_raw_data()
     check_parsed_data()
