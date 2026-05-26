@@ -53,6 +53,9 @@ mouse_mapping_url = "https://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/M
 mouse_mapping_raw_gz = "data/raw/Mus_musculus.gene_info.gz"
 mouse_mapping_raw = "data/raw/Mus_musculus.gene_info"
 
+phenotype_to_genes_url = "https://figshare.com/ndownloader/files/27722238"
+phenotype_to_genes_raw = "data/raw/phenotype_to_genes.txt"
+
 human_mapping_url = "https://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz"
 human_mapping_raw_gz = "data/raw/Homo_sapiens.gene_info.gz" 
 human_mapping_raw = "data/raw/Homo_sapiens.gene_info"
@@ -76,7 +79,12 @@ def check_raw_data():
         get_human_atlas()
     if not os.path.exists(expression_alliance_raw):
         get_expression_alliance()
-            
+    if not os.path.exists(phenotype_to_genes_raw):
+        get_phenotype_genes()
+
+def get_phenotype_genes():
+    __get_url(phenotype_to_genes_url, phenotype_to_genes_raw)
+
 def get_expression_alliance():
     __get_url(expression_alliance_url, expression_alliance_raw_gz, expression_alliance_raw)
     __get_url(mouse_mapping_url, mouse_mapping_raw_gz, mouse_mapping_raw)
