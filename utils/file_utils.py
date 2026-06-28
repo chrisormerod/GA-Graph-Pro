@@ -4,6 +4,8 @@ import h5py
 import pandas as pd
 import numpy as np
 import zipfile
+import os
+import torch
 
 def unzip(gz_file : str, 
          filepath : str):
@@ -48,3 +50,17 @@ def read_h5(filename: str) -> pd.DataFrame:
 
     # Return the resulting DataFrame
     return embedding_df
+
+def convert_dir_to_cpu_fp16(directory_path):
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".torch"):
+            file_path = os.path.join(directory_path, filename)
+            
+            state_dict = torch.load(file_path, map_location="cpu", weights_only=False)
+            
+            converted_state_dict = {
+                k: v.half() if torch.is_tensor(v) and v.is_floating_point() else v
+                for k, v in state_dict.items()
+            }
+            
+            torch.save(converted_state_dict, file_path)
