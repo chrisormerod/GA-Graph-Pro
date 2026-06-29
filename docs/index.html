@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feather Files Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/apache-arrow@18.1.0/Arrow.dom.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .table-container { margin-bottom: 40px; overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; min-width: 600px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; position: sticky; top: 0; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Feather Files Data</h1>
+    
+    <div class="table-container">
+        <h2>File 1</h2>
+        <div id="status1">Loading...</div>
+        <table id="table1"></table>
+    </div>
+
+    <div class="table-container">
+        <h2>File 2</h2>
+        <div id="status2">Loading...</div>
+        <table id="table2"></table>
+    </div>
+
+    <script>
+        // Replace with direct download URLs (or CORS proxy URLs if Drive blocks the fetch)
+        // Format for Google Drive direct link: https://drive.google.com/uc?export=download&id=FILE_ID
+        const file1Url = 'YOUR_FILE_1_URL'; 
+        const file2Url = 'YOUR_FILE_2_URL';
+
+        async function loadAndRenderFeather(url, tableId, statusId) {
+            const tableElement = document.getElementById(tableId);
+            const statusElement = document.getElementById(statusId);
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                
+                const buffer = await response.arrayBuffer();
+                const table = arrow.tableFromIPC(buffer);
+                
+                const fields = table.schema.fields.map(f => f.name);
+                
+                let thead = '<thead><tr>';
+                fields.forEach(field => {
+                    thead += `<th>${field}</th>`;
+                });
+                thead += '</tr></thead>';
+
+                let tbody = '<tbody>';
+                for (let i = 0; i < Math.min(table.numRows, 1000); i++) { // Render up to 1000 rows to prevent freezing
+                    tbody += '<tr>';
+                    const row = table.get(i);
+                    fields.forEach(field => {
+                        tbody += `<td>${row[field] !== null ? row[field] : ''}</td>`;
+                    });
+                    tbody += '</tr>';
+                }
+                tbody += '</tbody>';
+
+                tableElement.innerHTML = thead + tbody;
+                statusElement.style.display = 'none';
+
+            } catch (error) {
+                console.error('Error loading feather file:', error);
+                statusElement.innerHTML = `<span class="error">Failed to load data: ${error.message}. Ensure CORS is enabled or use a proxy for Google Drive links.</span>`;
+            }
+        }
+
+        loadAndRenderFeather(file1Url, 'table1', 'status1');
+        loadAndRenderFeather(file2Url, 'table2', 'status2');
+    </script>
+</body>
+</html>
