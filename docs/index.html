@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feather Files Viewer</title>
-    <script src="https://cdn.jsdelivr.net/npm/apache-arrow@18.1.0/Arrow.dom.min.js"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; }
         .table-container { margin-bottom: 40px; overflow-x: auto; }
@@ -29,9 +28,12 @@
         <table id="table2"></table>
     </div>
 
-    <script>
-        // Replace with direct download URLs (or CORS proxy URLs if Drive blocks the fetch)
-        // Format for Google Drive direct link: https://drive.google.com/uc?export=download&id=FILE_ID
+    <script type="module">
+        import { tableFromIPC } from "https://cdn.jsdelivr.net/npm/apache-arrow@18.1.0/+esm";
+
+        // Replace with direct download URLs. 
+        // Example with a CORS proxy if Google Drive blocks the fetch:
+        // const file1Url = 'https://corsproxy.io/?' + encodeURIComponent('https://drive.google.com/uc?export=download&id=YOUR_FILE_1_ID');
         const file1Url = 'https://drive.google.com/file/d/12M7nL-2LY9yOESiKdiugaXx8pzbZPmQF/view?usp=drive_link'; 
         const file2Url = 'YOUR_FILE_2_URL';
 
@@ -44,7 +46,7 @@
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                 
                 const buffer = await response.arrayBuffer();
-                const table = arrow.tableFromIPC(buffer);
+                const table = tableFromIPC(buffer);
                 
                 const fields = table.schema.fields.map(f => f.name);
                 
@@ -55,7 +57,7 @@
                 thead += '</tr></thead>';
 
                 let tbody = '<tbody>';
-                for (let i = 0; i < Math.min(table.numRows, 1000); i++) { // Render up to 1000 rows to prevent freezing
+                for (let i = 0; i < Math.min(table.numRows, 1000); i++) { // Render up to 1000 rows
                     tbody += '<tr>';
                     const row = table.get(i);
                     fields.forEach(field => {
@@ -74,8 +76,8 @@
             }
         }
 
-        loadAndRenderFeather(file1Url, 'table1', 'status1');
-        loadAndRenderFeather(file2Url, 'table2', 'status2');
+        if (file1Url !== 'YOUR_FILE_1_URL') loadAndRenderFeather(file1Url, 'table1', 'status1');
+        if (file2Url !== 'YOUR_FILE_2_URL') loadAndRenderFeather(file2Url, 'table2', 'status2');
     </script>
 </body>
 </html>
